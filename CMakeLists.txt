@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Drogon CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 find_package(libpqxx CONFIG QUIET)
 
@@ -22,6 +23,7 @@ add_executable(webhawk_lite
 
     src/controllers/HealthController.cpp
     src/controllers/DatabaseHealthController.cpp
+    src/controllers/AuthController.cpp
 
     src/config/AppConfig.cpp
     src/database/Database.cpp
@@ -31,6 +33,10 @@ add_executable(webhawk_lite
     src/repositories/BackendRepository.cpp
     src/repositories/SecurityLogRepository.cpp
     src/repositories/RateLimitRepository.cpp
+
+    src/services/AuthService.cpp
+
+    src/security/PasswordHasher.cpp
 )
 
 target_include_directories(webhawk_lite
@@ -42,4 +48,5 @@ target_link_libraries(webhawk_lite
     PRIVATE
         Drogon::Drogon
         ${PQXX_TARGET}
+        OpenSSL::Crypto
 )

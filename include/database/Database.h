@@ -12,5 +12,7 @@ public:
     static int countQuery(
         const std::string& sql
     );
+
+    static std::string connectionString();
 };
 }

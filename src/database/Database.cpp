@@ -36,3 +36,8 @@ int Database::countQuery(
 
     return result[0][0].as<int>();
 }
+
+std::string Database::connectionString()
+{
+    return webhawk::config::AppConfig::databaseConnectionString();
+}
