@@ -15,3 +15,11 @@ This part adds PostgreSQL using Docker Compose and creates the five main WebHawk
 
 ```bash
 docker compose up -d
+## Part 03 - Database layer
+
+This part adds the C++ database connection layer, model structs, repository foundation, and a database health endpoint.
+
+### Database health endpoint
+
+```http
+GET /db/health
