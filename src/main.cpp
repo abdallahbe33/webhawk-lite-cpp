@@ -1,17 +1,12 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include <drogon/drogon.h>
 
+#include "config/AppConfig.h"
+
 int main()
 {
-    int port = 8080;
-
-    if (const char* portFromEnv = std::getenv("PORT"))
-    {
-        port = std::stoi(portFromEnv);
-    }
+    const int port = webhawk::config::AppConfig::port();
 
     std::cout << "Starting WebHawk Lite C++ on port " << port << std::endl;
 
