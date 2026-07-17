@@ -37,6 +37,8 @@ add_executable(webhawk_lite
     src/services/AuthService.cpp
 
     src/security/PasswordHasher.cpp
+    src/security/JwtService.cpp
+    src/security/AuthMiddleware.cpp
 )
 
 target_include_directories(webhawk_lite

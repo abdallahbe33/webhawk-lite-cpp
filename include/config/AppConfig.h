@@ -17,6 +17,9 @@ public:
 
     static std::string databaseConnectionString();
 
+    static std::string jwtSecretKey();
+    static int jwtExpirationSeconds();
+
 private:
     static std::string getEnv(
         const std::string& key,
