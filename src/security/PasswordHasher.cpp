@@ -2,6 +2,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <openssl/crypto.h>
 
 #include <iomanip>
 #include <sstream>
@@ -57,6 +58,20 @@ std::string PasswordHasher::hashPassword(
 {
     const std::string saltHex = generateSalt();
 
+    return "pbkdf2_sha256$"
+        + std::to_string(ITERATIONS)
+        + "$"
+        + saltHex
+        + "$"
+        + deriveHash(password, saltHex, ITERATIONS);
+}
+
+std::string PasswordHasher::deriveHash(
+    const std::string& password,
+    const std::string& saltHex,
+    int iterations
+)
+{
     std::vector<unsigned char> hash(HASH_SIZE);
 
     if (
@@ -65,7 +80,7 @@ std::string PasswordHasher::hashPassword(
             static_cast<int>(password.size()),
             reinterpret_cast<const unsigned char*>(saltHex.c_str()),
             static_cast<int>(saltHex.size()),
-            ITERATIONS,
+            iterations,
             EVP_sha256(),
             HASH_SIZE,
             hash.data()
@@ -75,10 +90,67 @@ std::string PasswordHasher::hashPassword(
         throw std::runtime_error("Failed to hash password");
     }
 
-    return "pbkdf2_sha256$"
-        + std::to_string(ITERATIONS)
-        + "$"
-        + saltHex
-        + "$"
-        + toHex(hash.data(), HASH_SIZE);
+    return toHex(hash.data(), HASH_SIZE);
+}
+
+bool PasswordHasher::verifyPassword(
+    const std::string& password,
+    const std::string& storedHash
+)
+{
+    const std::size_t firstSeparator = storedHash.find('$');
+    const std::size_t secondSeparator = storedHash.find(
+        '$',
+        firstSeparator + 1
+    );
+    const std::size_t thirdSeparator = storedHash.find(
+        '$',
+        secondSeparator + 1
+    );
+
+    if (
+        firstSeparator == std::string::npos
+        || secondSeparator == std::string::npos
+        || thirdSeparator == std::string::npos
+        || storedHash.substr(0, firstSeparator) != "pbkdf2_sha256"
+    )
+    {
+        return false;
+    }
+
+    try
+    {
+        const int iterations = std::stoi(
+            storedHash.substr(
+                firstSeparator + 1,
+                secondSeparator - firstSeparator - 1
+            )
+        );
+
+        const std::string saltHex = storedHash.substr(
+            secondSeparator + 1,
+            thirdSeparator - secondSeparator - 1
+        );
+
+        const std::string expectedHash = storedHash.substr(
+            thirdSeparator + 1
+        );
+
+        const std::string actualHash = deriveHash(
+            password,
+            saltHex,
+            iterations
+        );
+
+        return expectedHash.size() == actualHash.size()
+            && CRYPTO_memcmp(
+                expectedHash.data(),
+                actualHash.data(),
+                expectedHash.size()
+            ) == 0;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }

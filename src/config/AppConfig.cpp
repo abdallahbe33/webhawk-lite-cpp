@@ -80,3 +80,19 @@ std::string AppConfig::databaseConnectionString()
         + " user=" + databaseUser()
         + " password=" + databasePassword();
 }
+
+std::string AppConfig::jwtSecretKey()
+{
+    return getEnv(
+        "JWT_SECRET_KEY",
+        "development-jwt-secret-change-me"
+    );
+}
+
+int AppConfig::jwtExpirationSeconds()
+{
+    return getEnvInt(
+        "JWT_EXPIRATION_SECONDS",
+        86400
+    );
+}
