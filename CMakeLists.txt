@@ -24,6 +24,7 @@ add_executable(webhawk_lite
     src/controllers/HealthController.cpp
     src/controllers/DatabaseHealthController.cpp
     src/controllers/AuthController.cpp
+    src/controllers/BackendController.cpp
 
     src/config/AppConfig.cpp
     src/database/Database.cpp
@@ -35,10 +36,12 @@ add_executable(webhawk_lite
     src/repositories/RateLimitRepository.cpp
 
     src/services/AuthService.cpp
+    src/services/BackendService.cpp
 
     src/security/PasswordHasher.cpp
     src/security/JwtService.cpp
     src/security/AuthMiddleware.cpp
+    src/security/ApiKeyGenerator.cpp
 )
 
 target_include_directories(webhawk_lite
