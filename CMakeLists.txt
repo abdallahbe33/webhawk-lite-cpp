@@ -25,6 +25,7 @@ add_executable(webhawk_lite
     src/controllers/DatabaseHealthController.cpp
     src/controllers/AuthController.cpp
     src/controllers/BackendController.cpp
+    src/controllers/SecurityController.cpp
 
     src/config/AppConfig.cpp
     src/database/Database.cpp
@@ -37,11 +38,13 @@ add_executable(webhawk_lite
 
     src/services/AuthService.cpp
     src/services/BackendService.cpp
+    src/services/SecurityService.cpp
 
     src/security/PasswordHasher.cpp
     src/security/JwtService.cpp
     src/security/AuthMiddleware.cpp
     src/security/ApiKeyGenerator.cpp
+    src/security/SqlInjectionDetector.cpp
 )
 
 target_include_directories(webhawk_lite
@@ -55,3 +58,29 @@ target_link_libraries(webhawk_lite
         ${PQXX_TARGET}
         OpenSSL::Crypto
 )
+
+include(CTest)
+
+if(BUILD_TESTING)
+    add_executable(sql_injection_detector_tests
+        tests/SqlInjectionDetectorTests.cpp
+        src/security/SqlInjectionDetector.cpp
+    )
+
+    target_include_directories(
+        sql_injection_detector_tests
+        PRIVATE
+            include
+    )
+
+    target_link_libraries(
+        sql_injection_detector_tests
+        PRIVATE
+            Drogon::Drogon
+    )
+
+    add_test(
+        NAME sql_injection_detector_tests
+        COMMAND sql_injection_detector_tests
+    )
+endif()
