@@ -3,7 +3,6 @@
 #include "security/DetectionResult.h"
 
 #include <json/json.h>
-#include <optional>
 #include <string>
 
 namespace webhawk::services
@@ -21,21 +20,14 @@ struct SecurityScanResult
 class SecurityService
 {
 public:
-    static SecurityScanResult scanSqlInjection(
+    static SecurityScanResult scanRequest(
         const std::string& authorizationHeader,
         const Json::Value& requestData
     );
 
-private:
-    struct LocatedDetection
-    {
-        std::string field;
-        webhawk::security::DetectionResult detection;
-    };
-
-    static std::optional<LocatedDetection> scanNode(
-        const Json::Value& value,
-        const std::string& fieldPath
+    static SecurityScanResult scanSqlInjection(
+        const std::string& authorizationHeader,
+        const Json::Value& requestData
     );
 };
 }

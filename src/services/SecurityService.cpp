@@ -1,101 +1,16 @@
 #include "services/SecurityService.h"
 
 #include "security/AuthMiddleware.h"
-#include "security/SqlInjectionDetector.h"
+#include "security/RequestScanner.h"
 
 using namespace webhawk::services;
 
-std::optional<SecurityService::LocatedDetection>
-SecurityService::scanNode(
-    const Json::Value& value,
-    const std::string& fieldPath
-)
+namespace
 {
-    if (value.isString())
-    {
-        const auto detection =
-            webhawk::security::SqlInjectionDetector::scan(
-                value.asString()
-            );
-
-        if (detection.detected)
-        {
-            return LocatedDetection{
-                fieldPath,
-                detection
-            };
-        }
-
-        return std::nullopt;
-    }
-
-    if (value.isObject())
-    {
-        for (const auto& name : value.getMemberNames())
-        {
-            const std::string childPath = fieldPath.empty()
-                ? name
-                : fieldPath + "." + name;
-
-            // Scan parameter names as well as their values.
-            const auto nameDetection =
-                webhawk::security::SqlInjectionDetector::scan(
-                    name
-                );
-
-            if (nameDetection.detected)
-            {
-                return LocatedDetection{
-                    childPath + ".$key",
-                    nameDetection
-                };
-            }
-
-            const auto childDetection = scanNode(
-                value[name],
-                childPath
-            );
-
-            if (childDetection.has_value())
-            {
-                return childDetection;
-            }
-        }
-
-        return std::nullopt;
-    }
-
-    if (value.isArray())
-    {
-        for (
-            Json::ArrayIndex index = 0;
-            index < value.size();
-            ++index
-        )
-        {
-            const std::string childPath = fieldPath
-                + "["
-                + std::to_string(index)
-                + "]";
-
-            const auto childDetection = scanNode(
-                value[index],
-                childPath
-            );
-
-            if (childDetection.has_value())
-            {
-                return childDetection;
-            }
-        }
-    }
-
-    return std::nullopt;
-}
-
-SecurityScanResult SecurityService::scanSqlInjection(
+SecurityScanResult runScan(
     const std::string& authorizationHeader,
-    const Json::Value& requestData
+    const Json::Value& requestData,
+    bool sqlOnly
 )
 {
     const auto authentication =
@@ -115,7 +30,10 @@ SecurityScanResult SecurityService::scanSqlInjection(
         };
     }
 
-    if (!requestData.isObject() || requestData.empty())
+    if (
+        !requestData.isObject()
+        || requestData.empty()
+    )
     {
         return {
             false,
@@ -127,20 +45,21 @@ SecurityScanResult SecurityService::scanSqlInjection(
         };
     }
 
-    const auto locatedDetection = scanNode(
-        requestData,
-        ""
-    );
+    const auto scanResult = sqlOnly
+        ? webhawk::security::RequestScanner::
+            scanSqlInjection(requestData)
+        : webhawk::security::RequestScanner::
+            scan(requestData);
 
-    if (locatedDetection.has_value())
+    if (!scanResult.allowed)
     {
         return {
             true,
             403,
             false,
             "",
-            locatedDetection->field,
-            locatedDetection->detection
+            scanResult.field,
+            scanResult.detection
         };
     }
 
@@ -152,4 +71,29 @@ SecurityScanResult SecurityService::scanSqlInjection(
         "",
         {}
     };
+}
+}
+
+SecurityScanResult SecurityService::scanRequest(
+    const std::string& authorizationHeader,
+    const Json::Value& requestData
+)
+{
+    return runScan(
+        authorizationHeader,
+        requestData,
+        false
+    );
+}
+
+SecurityScanResult SecurityService::scanSqlInjection(
+    const std::string& authorizationHeader,
+    const Json::Value& requestData
+)
+{
+    return runScan(
+        authorizationHeader,
+        requestData,
+        true
+    );
 }
