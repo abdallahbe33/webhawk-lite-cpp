@@ -1,5 +1,5 @@
 #include "config/AppConfig.h"
-
+#include <algorithm>
 #include <cstdlib>
 #include <string>
 
@@ -94,5 +94,28 @@ int AppConfig::jwtExpirationSeconds()
     return getEnvInt(
         "JWT_EXPIRATION_SECONDS",
         86400
+    );
+}
+int AppConfig::rateLimitRequests()
+{
+    return std::max(
+        1,
+        getEnvInt("RATE_LIMIT_REQUESTS", 100)
+    );
+}
+
+int AppConfig::rateLimitWindowSeconds()
+{
+    return std::max(
+        1,
+        getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 60)
+    );
+}
+
+int AppConfig::rateLimitBlockSeconds()
+{
+    return std::max(
+        1,
+        getEnvInt("RATE_LIMIT_BLOCK_SECONDS", 60)
     );
 }

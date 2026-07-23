@@ -26,7 +26,7 @@ add_executable(webhawk_lite
     src/controllers/AuthController.cpp
     src/controllers/BackendController.cpp
     src/controllers/SecurityController.cpp
-
+    src/controllers/RateLimitController.cpp
     src/config/AppConfig.cpp
     src/database/Database.cpp
 
@@ -45,6 +45,10 @@ add_executable(webhawk_lite
     src/security/AuthMiddleware.cpp
     src/security/ApiKeyGenerator.cpp
     src/security/SqlInjectionDetector.cpp
+    src/security/XssDetector.cpp
+    src/security/RequestScanner.cpp
+    src/security/RateLimitPolicy.cpp
+    src/security/RateLimiter.cpp
 )
 
 target_include_directories(webhawk_lite
@@ -65,6 +69,7 @@ if(BUILD_TESTING)
     add_executable(sql_injection_detector_tests
         tests/SqlInjectionDetectorTests.cpp
         src/security/SqlInjectionDetector.cpp
+
     )
 
     target_include_directories(
@@ -82,5 +87,65 @@ if(BUILD_TESTING)
     add_test(
         NAME sql_injection_detector_tests
         COMMAND sql_injection_detector_tests
+    )
+    add_executable(xss_detector_tests
+        tests/XssDetectorTests.cpp
+        src/security/XssDetector.cpp
+    )
+
+    target_include_directories(
+        xss_detector_tests
+        PRIVATE
+            include
+    )
+
+    target_link_libraries(
+        xss_detector_tests
+        PRIVATE
+            Drogon::Drogon
+    )
+
+    add_test(
+        NAME xss_detector_tests
+        COMMAND xss_detector_tests
+    )
+
+    add_executable(request_scanner_tests
+        tests/RequestScannerTests.cpp
+        src/security/RequestScanner.cpp
+        src/security/SqlInjectionDetector.cpp
+        src/security/XssDetector.cpp
+    )
+
+    target_include_directories(
+        request_scanner_tests
+        PRIVATE
+            include
+    )
+
+    target_link_libraries(
+        request_scanner_tests
+        PRIVATE
+            Drogon::Drogon
+    )
+
+    add_test(
+        NAME request_scanner_tests
+        COMMAND request_scanner_tests
+    )
+    add_executable(rate_limit_policy_tests
+        tests/RateLimitPolicyTests.cpp
+        src/security/RateLimitPolicy.cpp
+    )
+
+    target_include_directories(
+        rate_limit_policy_tests
+        PRIVATE
+            include
+    )
+
+    add_test(
+        NAME rate_limit_policy_tests
+        COMMAND rate_limit_policy_tests
     )
 endif()
