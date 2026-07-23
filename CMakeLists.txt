@@ -26,7 +26,7 @@ add_executable(webhawk_lite
     src/controllers/AuthController.cpp
     src/controllers/BackendController.cpp
     src/controllers/SecurityController.cpp
-
+    src/controllers/RateLimitController.cpp
     src/config/AppConfig.cpp
     src/database/Database.cpp
 
@@ -47,6 +47,8 @@ add_executable(webhawk_lite
     src/security/SqlInjectionDetector.cpp
     src/security/XssDetector.cpp
     src/security/RequestScanner.cpp
+    src/security/RateLimitPolicy.cpp
+    src/security/RateLimiter.cpp
 )
 
 target_include_directories(webhawk_lite
@@ -130,5 +132,20 @@ if(BUILD_TESTING)
     add_test(
         NAME request_scanner_tests
         COMMAND request_scanner_tests
+    )
+    add_executable(rate_limit_policy_tests
+        tests/RateLimitPolicyTests.cpp
+        src/security/RateLimitPolicy.cpp
+    )
+
+    target_include_directories(
+        rate_limit_policy_tests
+        PRIVATE
+            include
+    )
+
+    add_test(
+        NAME rate_limit_policy_tests
+        COMMAND rate_limit_policy_tests
     )
 endif()

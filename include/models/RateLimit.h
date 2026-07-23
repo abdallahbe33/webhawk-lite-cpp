@@ -14,5 +14,7 @@ struct RateLimit
     std::string windowStart;
     std::string blockedUntil;
     bool isBlocked{};
+    int remainingRequests{};
+    int retryAfterSeconds{};
 };
 }

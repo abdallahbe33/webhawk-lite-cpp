@@ -19,6 +19,9 @@ public:
 
     static std::string jwtSecretKey();
     static int jwtExpirationSeconds();
+    static int rateLimitRequests();
+    static int rateLimitWindowSeconds();
+    static int rateLimitBlockSeconds();
 
 private:
     static std::string getEnv(
