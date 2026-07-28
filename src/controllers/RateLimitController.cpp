@@ -3,7 +3,7 @@
 #include "repositories/BackendRepository.h"
 #include "security/AuthMiddleware.h"
 #include "security/RateLimiter.h"
-
+#include "repositories/SecurityLogRepository.h"
 #include <stdexcept>
 
 using namespace webhawk::controllers;
@@ -137,7 +137,18 @@ void RateLimitController::check(
                 ipAddress,
                 endpoint
             );
-
+        webhawk::repositories::
+         SecurityLogRepository::createLog(
+             backendId,
+            ipAddress,
+            "POST",
+            endpoint,
+            result.allowed
+                  ? "NONE"
+                : "RATE_LIMIT",
+            !result.allowed,
+            *json
+            );
         auto response =
             drogon::HttpResponse::
                 newHttpJsonResponse(

@@ -66,6 +66,17 @@ void sendScanResponse(
 
     callback(response);
 }
+std::string clientIp(
+    const drogon::HttpRequestPtr& request
+)
+{
+    const std::string ipAddress =
+        request->peerAddr().toIp();
+
+    return ipAddress.empty()
+        ? "unknown"
+        : ipAddress;
+}
 }
 
 void SecurityController::scanRequest(
@@ -95,7 +106,9 @@ void SecurityController::scanRequest(
                     request->getHeader(
                         "Authorization"
                     ),
-                    *json
+                    *json,
+                    clientIp(request)
+                 
                 );
 
         sendScanResponse(result, callback);
@@ -136,7 +149,8 @@ void SecurityController::scanSqlInjection(
                     request->getHeader(
                         "Authorization"
                     ),
-                    *json
+                    *json,
+                    clientIp(request)
                 );
 
         sendScanResponse(result, callback);
