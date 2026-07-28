@@ -16,6 +16,7 @@ endif()
 
 find_package(Drogon CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(libpqxx CONFIG REQUIRED)
 
 include(CTest)
 
@@ -77,6 +78,7 @@ target_link_libraries(
     PRIVATE
         Drogon::Drogon
         OpenSSL::Crypto
+        libpqxx::pqxx
 )
 
 if(BUILD_TESTING)
