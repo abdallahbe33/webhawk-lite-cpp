@@ -1,6 +1,6 @@
-
 #pragma once
 
+#include <json/json.h>
 #include <string>
 
 namespace webhawk::models
@@ -16,5 +16,7 @@ struct SecurityLog
     bool isBlocked{};
     std::string requestData;
     std::string createdAt;
+
+    Json::Value toJson() const;
 };
 }

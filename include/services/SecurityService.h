@@ -22,12 +22,14 @@ class SecurityService
 public:
     static SecurityScanResult scanRequest(
         const std::string& authorizationHeader,
-        const Json::Value& requestData
+        const Json::Value& requestData,
+        const std::string& ipAddress
     );
 
     static SecurityScanResult scanSqlInjection(
         const std::string& authorizationHeader,
-        const Json::Value& requestData
+        const Json::Value& requestData,
+        const std::string& ipAddress
     );
 };
 }
