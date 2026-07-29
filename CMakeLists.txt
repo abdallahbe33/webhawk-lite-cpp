@@ -12,6 +12,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
     add_compile_options(/Zc:__cplusplus)
+
+    set(
+        CMAKE_MSVC_RUNTIME_LIBRARY
+        "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    )
 endif()
 
 find_package(Drogon CONFIG REQUIRED)
