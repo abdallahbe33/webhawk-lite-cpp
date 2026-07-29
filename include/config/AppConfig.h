@@ -14,14 +14,17 @@ public:
     static std::string databaseName();
     static std::string databaseUser();
     static std::string databasePassword();
-
     static std::string databaseConnectionString();
 
     static std::string jwtSecretKey();
     static int jwtExpirationSeconds();
+
     static int rateLimitRequests();
     static int rateLimitWindowSeconds();
     static int rateLimitBlockSeconds();
+
+    static int proxyTimeoutSeconds();
+    static int proxyMaxBodyBytes();
 
 private:
     static std::string getEnv(

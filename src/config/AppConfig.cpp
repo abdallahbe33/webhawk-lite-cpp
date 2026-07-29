@@ -1,10 +1,10 @@
 #include "config/AppConfig.h"
-#include <algorithm>
+
 #include <cstdlib>
 #include <string>
 
-using namespace webhawk::config;
-
+namespace webhawk::config
+{
 std::string AppConfig::getEnv(
     const std::string& key,
     const std::string& defaultValue
@@ -17,7 +17,14 @@ std::string AppConfig::getEnv(
         return defaultValue;
     }
 
-    return std::string(value);
+    const std::string result(value);
+
+    if (result.empty())
+    {
+        return defaultValue;
+    }
+
+    return result;
 }
 
 int AppConfig::getEnvInt(
@@ -25,12 +32,11 @@ int AppConfig::getEnvInt(
     int defaultValue
 )
 {
-    const char* value = std::getenv(key.c_str());
-
-    if (value == nullptr)
-    {
-        return defaultValue;
-    }
+    const std::string value =
+        getEnv(
+            key,
+            std::to_string(defaultValue)
+        );
 
     try
     {
@@ -44,41 +50,66 @@ int AppConfig::getEnvInt(
 
 int AppConfig::port()
 {
-    return getEnvInt("PORT", 8080);
+    const int value =
+        getEnvInt(
+            "PORT",
+            8080
+        );
+
+    return value < 1 ? 8080 : value;
 }
 
 std::string AppConfig::databaseHost()
 {
-    return getEnv("DATABASE_HOST", "localhost");
+    return getEnv(
+        "DATABASE_HOST",
+        "127.0.0.1"
+    );
 }
 
 int AppConfig::databasePort()
 {
-    return getEnvInt("DATABASE_PORT", 5435);
+    const int value =
+        getEnvInt(
+            "DATABASE_PORT",
+            5435
+        );
+
+    return value < 1 ? 5435 : value;
 }
 
 std::string AppConfig::databaseName()
 {
-    return getEnv("DATABASE_NAME", "webhawk_cpp");
+    return getEnv(
+        "DATABASE_NAME",
+        "webhawk_cpp"
+    );
 }
 
 std::string AppConfig::databaseUser()
 {
-    return getEnv("DATABASE_USER", "webhawk");
+    return getEnv(
+        "DATABASE_USER",
+        "webhawk"
+    );
 }
 
 std::string AppConfig::databasePassword()
 {
-    return getEnv("DATABASE_PASSWORD", "webhawk_password");
+    return getEnv(
+        "DATABASE_PASSWORD",
+        "webhawk_password"
+    );
 }
 
 std::string AppConfig::databaseConnectionString()
 {
-    return "host=" + databaseHost()
-        + " port=" + std::to_string(databasePort())
-        + " dbname=" + databaseName()
-        + " user=" + databaseUser()
-        + " password=" + databasePassword();
+    return
+        "host=" + databaseHost() +
+        " port=" + std::to_string(databasePort()) +
+        " dbname=" + databaseName() +
+        " user=" + databaseUser() +
+        " password=" + databasePassword();
 }
 
 std::string AppConfig::jwtSecretKey()
@@ -91,31 +122,67 @@ std::string AppConfig::jwtSecretKey()
 
 int AppConfig::jwtExpirationSeconds()
 {
-    return getEnvInt(
-        "JWT_EXPIRATION_SECONDS",
-        86400
-    );
+    const int value =
+        getEnvInt(
+            "JWT_EXPIRATION_SECONDS",
+            86400
+        );
+
+    return value < 1 ? 86400 : value;
 }
+
 int AppConfig::rateLimitRequests()
 {
-    return std::max(
-        1,
-        getEnvInt("RATE_LIMIT_REQUESTS", 100)
-    );
+    const int value =
+        getEnvInt(
+            "RATE_LIMIT_REQUESTS",
+            100
+        );
+
+    return value < 1 ? 1 : value;
 }
 
 int AppConfig::rateLimitWindowSeconds()
 {
-    return std::max(
-        1,
-        getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 60)
-    );
+    const int value =
+        getEnvInt(
+            "RATE_LIMIT_WINDOW_SECONDS",
+            60
+        );
+
+    return value < 1 ? 1 : value;
 }
 
 int AppConfig::rateLimitBlockSeconds()
 {
-    return std::max(
-        1,
-        getEnvInt("RATE_LIMIT_BLOCK_SECONDS", 60)
-    );
+    const int value =
+        getEnvInt(
+            "RATE_LIMIT_BLOCK_SECONDS",
+            60
+        );
+
+    return value < 1 ? 1 : value;
+}
+
+int AppConfig::proxyTimeoutSeconds()
+{
+    const int value =
+        getEnvInt(
+            "PROXY_TIMEOUT_SECONDS",
+            10
+        );
+
+    return value < 1 ? 1 : value;
+}
+
+int AppConfig::proxyMaxBodyBytes()
+{
+    const int value =
+        getEnvInt(
+            "PROXY_MAX_BODY_BYTES",
+            1048576
+        );
+
+    return value < 1024 ? 1024 : value;
+}
 }
