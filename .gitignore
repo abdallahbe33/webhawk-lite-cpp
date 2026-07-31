@@ -7,3 +7,8 @@ logs/
 *.db
 *.sqlite
 .env
+build-static/
+build-docker/
+vulnerable-build*.txtbuild-check/
+
+build-check/

@@ -181,9 +181,12 @@ bool ProxyUtils::isHopByHopHeader(
         "x-webhawk-backend-id"
     };
 
-    return blockedHeaders.contains(
-        lowercase(headerName)
-    );
+    const std::string normalizedName =
+        lowercase(headerName);
+
+    return blockedHeaders.find(
+        normalizedName
+    ) != blockedHeaders.end();
 }
 
 bool ProxyUtils::isSensitiveHeader(

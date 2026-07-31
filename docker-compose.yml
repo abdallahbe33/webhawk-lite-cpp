@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:16-alpine
     container_name: webhawk_cpp_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: webhawk_cpp
       POSTGRES_USER: webhawk
@@ -12,10 +13,78 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U webhawk -d webhawk_cpp"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U webhawk -d webhawk_cpp
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
+
+  vulnerable-backend:
+    build:
+      context: ./vulnerable_backend
+      dockerfile: Dockerfile
+    container_name: webhawk_cpp_vulnerable_backend
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:5001/health
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  webhawk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webhawk_cpp_api
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      PORT: 8080
+
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: webhawk_cpp
+      DATABASE_USER: webhawk
+      DATABASE_PASSWORD: webhawk_password
+
+      JWT_SECRET_KEY: docker-demo-jwt-secret-change-me
+      JWT_EXPIRATION_SECONDS: 86400
+
+      RATE_LIMIT_REQUESTS: 100
+      RATE_LIMIT_WINDOW_SECONDS: 60
+      RATE_LIMIT_BLOCK_SECONDS: 60
+
+      PROXY_TIMEOUT_SECONDS: 10
+      PROXY_MAX_BODY_BYTES: 1048576
+    ports:
+      - "8080:8080"
+    volumes:
+      - webhawk_logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      vulnerable-backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:8080/health
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
 volumes:
   postgres_data:
+  webhawk_logs:
