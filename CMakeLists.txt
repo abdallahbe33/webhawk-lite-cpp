@@ -21,7 +21,32 @@ endif()
 
 find_package(Drogon CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(libpqxx CONFIG REQUIRED)
+
+# Homebrew and vcpkg provide a libpqxx CMake package.
+# Ubuntu may provide only pkg-config metadata.
+# Supporting both makes the project work on macOS, Windows, and Docker Linux.
+find_package(libpqxx CONFIG QUIET)
+
+if(TARGET libpqxx::pqxx)
+    set(
+        WEBHAWK_PQXX_TARGET
+        libpqxx::pqxx
+    )
+else()
+    find_package(PkgConfig REQUIRED)
+
+    pkg_check_modules(
+        PQXX
+        REQUIRED
+        IMPORTED_TARGET
+        libpqxx
+    )
+
+    set(
+        WEBHAWK_PQXX_TARGET
+        PkgConfig::PQXX
+    )
+endif()
 
 include(CTest)
 
@@ -83,7 +108,7 @@ target_link_libraries(
     PRIVATE
         Drogon::Drogon
         OpenSSL::Crypto
-        libpqxx::pqxx
+        ${WEBHAWK_PQXX_TARGET}
 )
 
 if(BUILD_TESTING)
@@ -97,6 +122,12 @@ if(BUILD_TESTING)
         sql_injection_detector_tests
         PRIVATE
             include
+    )
+
+    target_link_libraries(
+        sql_injection_detector_tests
+        PRIVATE
+            Drogon::Drogon
     )
 
     add_test(
@@ -114,6 +145,12 @@ if(BUILD_TESTING)
         xss_detector_tests
         PRIVATE
             include
+    )
+
+    target_link_libraries(
+        xss_detector_tests
+        PRIVATE
+            Drogon::Drogon
     )
 
     add_test(
@@ -135,6 +172,12 @@ if(BUILD_TESTING)
             include
     )
 
+    target_link_libraries(
+        request_scanner_tests
+        PRIVATE
+            Drogon::Drogon
+    )
+
     add_test(
         NAME request_scanner_tests
         COMMAND request_scanner_tests
@@ -150,6 +193,12 @@ if(BUILD_TESTING)
         rate_limit_policy_tests
         PRIVATE
             include
+    )
+
+    target_link_libraries(
+        rate_limit_policy_tests
+        PRIVATE
+            Drogon::Drogon
     )
 
     add_test(
@@ -192,39 +241,14 @@ if(BUILD_TESTING)
             include
     )
 
-    add_test(
-        NAME proxy_utils_tests
-        COMMAND proxy_utils_tests
-    )
-    target_link_libraries(
-        sql_injection_detector_tests
-        PRIVATE
-            Drogon::Drogon
-    )
-
-    target_link_libraries(
-        xss_detector_tests
-        PRIVATE
-            Drogon::Drogon
-    )
-
-    target_link_libraries(
-        request_scanner_tests
-        PRIVATE
-            Drogon::Drogon
-    )
-
-    target_link_libraries(
-        rate_limit_policy_tests
-        PRIVATE
-            Drogon::Drogon
-    )
-
-    
-
     target_link_libraries(
         proxy_utils_tests
         PRIVATE
             Drogon::Drogon
+    )
+
+    add_test(
+        NAME proxy_utils_tests
+        COMMAND proxy_utils_tests
     )
 endif()

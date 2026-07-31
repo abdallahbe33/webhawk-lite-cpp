@@ -21,7 +21,7 @@ RUN apt-get update \
         libyaml-cpp-dev \
         curl \
         ca-certificates \
-        libmysqlclient-dev \
+        libmariadb-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

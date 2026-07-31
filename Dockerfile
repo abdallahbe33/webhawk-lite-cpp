@@ -18,7 +18,7 @@ RUN apt-get update \
         libc-ares-dev \
         libhiredis-dev \
         libyaml-cpp-dev \
-        libmysqlclient-dev \
+        libmariadb-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /source
