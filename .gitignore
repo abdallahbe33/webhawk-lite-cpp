@@ -7,3 +7,5 @@ logs/
 *.db
 *.sqlite
 .env
+build-static/
+build-docker/

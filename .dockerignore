@@ -1,0 +1,11 @@
+.git
+.github
+.vscode
+.idea
+build
+build-*
+cmake-build-*
+logs
+.env
+.DS_Store
+vulnerable_backend
