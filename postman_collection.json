@@ -1,0 +1,539 @@
+{
+  "info": {
+    "_postman_id": "9f58f9cd-9c61-4ee8-8090-2a8a4d452f13",
+    "name": "WebHawk Lite C++ - Complete API",
+    "description": "Complete Postman collection for the WebHawk Lite C++ project. Run the requests from top to bottom.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "vulnerable_url",
+      "value": "http://localhost:5001"
+    },
+    {
+      "key": "target_url",
+      "value": "http://vulnerable-backend:5001"
+    },
+    {
+      "key": "user_name",
+      "value": "WebHawk Student"
+    },
+    {
+      "key": "user_email",
+      "value": "webhawk.cpp@example.com"
+    },
+    {
+      "key": "user_password",
+      "value": "Password123!"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "backend_id",
+      "value": ""
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "Database Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/db/health"
+          }
+        },
+        {
+          "name": "Vulnerable Backend Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{vulnerable_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{user_name}}\",\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', data.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/sessions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Backend Management",
+      "item": [
+        {
+          "name": "Register Backend",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('backend_id', String(data.backend.id));",
+                  "    pm.collectionVariables.set('api_key', data.backend.api_key);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_name\": \"Demo Store Backend\",\n  \"target_url\": \"{{target_url}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/backends"
+          }
+        },
+        {
+          "name": "List Backends",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/backends"
+          }
+        },
+        {
+          "name": "Get Backend",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/backends/{{backend_id}}"
+          }
+        },
+        {
+          "name": "Update Backend",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_name\": \"Updated Demo Store\",\n  \"target_url\": \"{{target_url}}\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/backends/{{backend_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Security",
+      "item": [
+        {
+          "name": "Safe Security Scan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"backend_id\": {{backend_id}},\n  \"method\": \"GET\",\n  \"path\": \"/products\",\n  \"query\": {\n    \"category\": \"phones\"\n  },\n  \"body\": {},\n  \"headers\": {\n    \"Accept\": \"application/json\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/security/scan"
+          }
+        },
+        {
+          "name": "SQL Injection Scan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"backend_id\": {{backend_id}},\n  \"method\": \"GET\",\n  \"path\": \"/search\",\n  \"query\": {\n    \"q\": \"' OR 1=1 --\"\n  },\n  \"body\": {},\n  \"headers\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/security/scan/sql-injection"
+          }
+        },
+        {
+          "name": "XSS Scan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"backend_id\": {{backend_id}},\n  \"method\": \"POST\",\n  \"path\": \"/comments\",\n  \"query\": {},\n  \"body\": {\n    \"comment\": \"<script>alert(1)</script>\"\n  },\n  \"headers\": {\n    \"Content-Type\": \"application/json\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/security/scan"
+          }
+        },
+        {
+          "name": "Rate Limit Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"backend_id\": {{backend_id}},\n  \"endpoint\": \"/rate-limit-demo\",\n  \"ip_address\": \"192.0.2.10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/security/rate-limit/check"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Reverse Proxy",
+      "item": [
+        {
+          "name": "Safe Proxy Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/proxy/{{api_key}}/products?category=phones"
+          }
+        },
+        {
+          "name": "Safe Comment Through Proxy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"This is a safe comment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/proxy/{{api_key}}/comments"
+          }
+        },
+        {
+          "name": "Blocked SQL Injection Through Proxy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/proxy/{{api_key}}/search?q=%27%20OR%201%3D1%20--"
+          }
+        },
+        {
+          "name": "Blocked XSS Through Proxy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"<script>alert(1)</script>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/proxy/{{api_key}}/comments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Logs and Analytics",
+      "item": [
+        {
+          "name": "Security Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/logs/security?page=1&page_size=20"
+          }
+        },
+        {
+          "name": "Blocked Security Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/logs/security?page=1&page_size=20&blocked=true&backend_id={{backend_id}}"
+          }
+        },
+        {
+          "name": "Analytics Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analytics/summary"
+          }
+        },
+        {
+          "name": "Attacks By Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analytics/attacks-by-type"
+          }
+        },
+        {
+          "name": "Recent Attacks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analytics/recent-attacks?limit=10"
+          }
+        },
+        {
+          "name": "Attacks Over Time",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/analytics/attacks-over-time?days=7"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Cleanup - Run Last",
+      "item": [
+        {
+          "name": "Disable Backend",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/backends/{{backend_id}}"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/logout"
+          }
+        }
+      ]
+    }
+  ]
+}
