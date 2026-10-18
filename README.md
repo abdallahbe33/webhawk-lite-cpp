@@ -600,16 +600,4 @@ The environment variables are documented in `.env.example`.
 
 WebHawk Lite is an educational project and is not intended to replace a production WAF.
 
-## Submission checklist
 
-- [x] Complete C++ code on GitHub
-- [x] Detailed README
-- [x] Five PostgreSQL tables
-- [x] Postman collection with all endpoints
-- [x] Vulnerable C++ backend
-- [x] SQL Injection demonstration
-- [x] XSS demonstration
-- [x] Security logs
-- [x] Analytics
-- [x] Docker Compose
-- [x] Automated tests
